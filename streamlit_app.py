@@ -23,14 +23,50 @@ LIGHT = "#F3F7FA"
 st.markdown(
     f"""
     <style>
-      .stApp {{ background: {LIGHT}; }}
-      [data-testid="stMetric"] {{ background: white; border: 1px solid #D9E3EA; border-radius: 12px; padding: 16px; }}
-      h1, h2, h3 {{ color: {NAVY}; }}
-      .scope-note {{ background:white; border-left:4px solid {BLUE}; padding:12px 16px; border-radius:6px; }}
+      .stApp {{ background: {LIGHT}; color: {NAVY}; }}
+      [data-testid="stAppViewContainer"],
+      [data-testid="stAppViewContainer"] p,
+      [data-testid="stAppViewContainer"] label,
+      [data-testid="stAppViewContainer"] h1,
+      [data-testid="stAppViewContainer"] h2,
+      [data-testid="stAppViewContainer"] h3 {{ color: {NAVY} !important; }}
+      [data-testid="stMetric"] {{
+        background: white;
+        border: 1px solid #D9E3EA;
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 2px 8px rgba(18, 48, 71, 0.05);
+      }}
+      [data-testid="stMetricLabel"],
+      [data-testid="stMetricLabel"] p {{ color: #4B6475 !important; }}
+      [data-testid="stMetricValue"],
+      [data-testid="stMetricValue"] div {{ color: {NAVY} !important; }}
+      [data-testid="stCaptionContainer"],
+      [data-testid="stCaptionContainer"] p {{ color: #566B79 !important; }}
+      .scope-note {{
+        background: white;
+        color: #334E60 !important;
+        border-left: 4px solid {BLUE};
+        padding: 12px 16px;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(18, 48, 71, 0.04);
+      }}
     </style>
     """,
     unsafe_allow_html=True,
 )
+
+
+def show_chart(fig: go.Figure) -> None:
+    """Render charts with a stable light theme on local and hosted deployments."""
+    fig.update_layout(
+        template="plotly_white",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="#FFFFFF",
+        font=dict(color=NAVY),
+        title_font=dict(color=NAVY),
+    )
+    st.plotly_chart(fig, width="stretch", theme=None)
 
 
 @st.cache_data(show_spinner=False)
@@ -105,7 +141,7 @@ if page == "Executive Summary":
             title="Highest-cost drugs",
         )
         fig.update_layout(height=500, margin=dict(l=10, r=15, t=55, b=10), xaxis_tickformat="$,.2s")
-        st.plotly_chart(fig, width="stretch")
+        show_chart(fig)
     with right:
         states = state_summary().head(12).sort_values("total_drug_cost")
         fig = px.bar(
@@ -118,7 +154,7 @@ if page == "Executive Summary":
             title="States with the highest total drug cost",
         )
         fig.update_layout(height=500, margin=dict(l=10, r=15, t=55, b=10), xaxis_tickformat="$,.2s")
-        st.plotly_chart(fig, width="stretch")
+        show_chart(fig)
 
 elif page == "Drug Analysis":
     st.title("Drug Analysis")
@@ -137,7 +173,7 @@ elif page == "Drug Analysis":
             labels={"tot_drug_cst": "Total drug cost", "brnd_name": "Brand", "opioid_drug_flag": "Opioid"},
         )
         fig.update_layout(height=max(500, top_n * 24), xaxis_tickformat="$,.2s")
-        st.plotly_chart(fig, width="stretch")
+        show_chart(fig)
     with right:
         scatter = read_sql(
             """
@@ -161,7 +197,7 @@ elif page == "Drug Analysis":
             title="Utilization and cost per claim",
         )
         fig.update_layout(height=560)
-        st.plotly_chart(fig, width="stretch")
+        show_chart(fig)
 
     display = drugs.rename(
         columns={
@@ -208,7 +244,7 @@ elif page == "State Comparison":
         )
     )
     fig.update_layout(geo_scope="usa", height=540, margin=dict(l=0, r=0, t=15, b=0))
-    st.plotly_chart(fig, width="stretch")
+    show_chart(fig)
 
     table = states.rename(
         columns={
