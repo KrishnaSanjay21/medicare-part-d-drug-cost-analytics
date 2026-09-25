@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.analytics import executive_metrics, quality_results, state_summary, top_drugs
+from src.bootstrap import ensure_database_ready
 from src.config import DATABASE, DATASET_PAGE, DATA_YEAR
 
 st.set_page_config(page_title="Part D Atlas", page_icon="Rx", layout="wide")
@@ -38,6 +39,11 @@ def read_sql(sql: str) -> pd.DataFrame:
         return pd.read_sql_query(sql, connection)
 
 
+@st.cache_resource(show_spinner=False)
+def bootstrap_database():
+    return ensure_database_ready()
+
+
 def money(value: float) -> str:
     if value >= 1_000_000_000:
         return f"${value / 1_000_000_000:,.1f}B"
@@ -56,9 +62,14 @@ def count(value: float) -> str:
 
 if not DATABASE.exists():
     st.title("Part D Atlas")
-    st.error("The analytical database has not been created.")
-    st.code("python scripts/run_pipeline.py")
-    st.stop()
+    st.info("First launch: downloading the published CMS file and building the analytical database.")
+    try:
+        with st.spinner("Preparing the 2024 CMS Medicare Part D data…"):
+            bootstrap_database()
+    except Exception as exc:
+        st.error("The CMS dataset could not be prepared. Please reboot the Streamlit app and try again.")
+        st.caption(f"{type(exc).__name__}: {exc}")
+        st.stop()
 
 page = st.sidebar.radio(
     "View",

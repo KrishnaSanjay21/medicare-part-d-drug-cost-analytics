@@ -42,6 +42,10 @@ pytest
 streamlit run streamlit_app.py
 ```
 
+## Deploy on Streamlit Community Cloud
+
+Use repository `KrishnaSanjay21/medicare-part-d-drug-cost-analytics`, branch `main`, and main file `streamlit_app.py`. The raw CSV and SQLite database are intentionally excluded from Git. On the first cloud launch, the app downloads the pinned official CMS release and builds the analytical database automatically. Later sessions reuse the database while the Streamlit instance remains active.
+
 ## Dashboard views
 
 - **Executive Summary:** national claims, cost, standardized fills, cost per claim, top drugs, and leading states.
