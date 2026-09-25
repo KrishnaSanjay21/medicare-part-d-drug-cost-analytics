@@ -1,0 +1,13 @@
+__pycache__/
+node_modules/
+.pytest_cache/
+.venv/
+*.pyc
+data/raw/*.csv
+data/processed/*.db
+data/processed/*.sqlite
+outputs/*.csv
+outputs/*.json
+outputs/*.inspect.ndjson
+artifacts/*.html
+.streamlit/secrets.toml
